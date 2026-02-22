@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { ChatCircle, MagnifyingGlass, Plus, SquaresFour } from "@phosphor-icons/react";
+import React, { useEffect, useRef, useState } from "react";
+import { ChatCircle, MagnifyingGlass, Plus, Trash } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { Logo } from "../Logo";
 import { supabase } from "@/src/lib/supabaseClient";
@@ -28,6 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   triggerUpdate
 }) => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, sessionId: string } | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const fetchHistory = async () => {
     try {
@@ -68,6 +70,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
+
+  const handleContextMenu = (e: React.MouseEvent, sessionId: string) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, sessionId });
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!sessionId) return;
+    setHistory(prev => prev.filter(h => (h.session_id || 'default') !== sessionId));
+    try {
+      await supabase.from('messages').delete().eq('session_id', sessionId);
+      if (activeSessionId === sessionId) {
+        onNewChat();
+      }
+    } catch (err) {
+      console.error(err);
+      fetchHistory();
+    }
+  };
+
   const menuItems = [
     { icon: MagnifyingGlass, label: "Search", action: onSearchClick },
   ];
@@ -82,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex flex-col gap-1 mb-2">
         <button 
           onClick={onNewChat}
-          className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
+          className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#111] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
         >
           <Plus weight="bold" className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
           <span>New chat</span>
@@ -92,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button 
             key={item.label}
             onClick={item.action}
-            className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
+            className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#111] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
           >
             <item.icon weight="bold" className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
             <span>{item.label}</span>
@@ -100,33 +127,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 pt-6">
-        <h3 className="px-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider mb-4">History</h3>
+      <div className="flex-1 flex flex-col min-h-0 pt-2">
+        <h3 className="px-3 text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-4">History</h3>
         
-        <div className="flex-1 overflow-y-auto custom-scrollbar mr-2">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 relative">
           {history.length > 0 && (
             <div className="flex flex-col gap-1">
               {history.map((item) => (
-                <button 
-                  key={item.id} 
-                  onClick={() => onSessionSelect(item.session_id || 'default')}
-                  className={cn(
-                    "w-full text-left px-3 py-3 rounded-xl text-[15px] transition-all duration-200 truncate group relative flex items-center gap-3.5",
-                    activeSessionId === (item.session_id || 'default') 
-                      ? "bg-[#1a1a1a] text-gray-100" 
-                      : "text-gray-400 hover:bg-[#1a1a1a]/50 hover:text-gray-200"
-                  )}
-                >
-                  <ChatCircle weight="regular" className="w-5 h-5 shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors" />
-                  {item.content.length > 25
-                    ? item.content.slice(0, 25) + "..."
-                    : item.content}
-                </button>
+                <div key={item.id} onContextMenu={(e) => handleContextMenu(e, item.session_id || 'default')}>
+                  <button 
+                    onClick={() => onSessionSelect(item.session_id || 'default')}
+                    className={cn(
+                      "w-full text-left px-3 py-3 rounded-xl text-[15px] transition-all duration-200 truncate group relative flex items-center gap-3.5",
+                      activeSessionId === (item.session_id || 'default') 
+                        ? "bg-[#111] text-gray-100" 
+                        : "text-gray-400 hover:bg-[#111]/60 hover:text-gray-200"
+                    )}
+                  >
+                    <ChatCircle weight="regular" className="w-5 h-5 shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                    <span className="truncate">{item.content}</span>
+                  </button>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {contextMenu && (
+        <div 
+          ref={contextMenuRef}
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          className="fixed z-50 w-40 bg-[#111] rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-white/5"
+        >
+          <button 
+            onClick={() => handleDeleteSession(contextMenu.sessionId)}
+            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[#1a1a1a] flex items-center gap-2 transition-colors"
+          >
+            <Trash className="w-4 h-4" />
+            Delete Chat
+          </button>
+        </div>
+      )}
     </div>
   );
 };

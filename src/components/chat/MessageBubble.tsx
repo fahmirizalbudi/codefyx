@@ -1,12 +1,11 @@
 "use client";
-
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, User, Robot, Check } from '@phosphor-icons/react';
-import { cn } from '../../lib/utils';
+import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Check, Copy, Robot, User } from "@phosphor-icons/react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { cn } from "../../lib/utils";
 
 interface MessageBubbleProps {
   role: 'user' | 'assistant';
@@ -34,7 +33,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
         "flex max-w-4xl mx-auto gap-4 md:gap-6",
         isUser ? "flex-row-reverse" : "flex-row"
       )}>
-        {/* Avatar */}
         <div className={cn(
           "shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all",
           isUser 
@@ -44,7 +42,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
           {isUser ? <User weight="bold" className="w-4 h-4" /> : <Robot weight="bold" className="w-4 h-4" /> }
         </div>
 
-        {/* Content */}
         <div className={cn(
           "flex-1 min-w-0 space-y-1.5",
           isUser ? "text-right" : "text-left"
@@ -61,7 +58,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
             {isUser ? (
               content
             ) : (
-              <div className="prose prose-invert max-w-none prose-p:leading-7 prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0 prose-pre:border-0 prose-hr:border-0 prose-hr:bg-transparent prose-headings:border-0 prose-blockquote:border-0">
+              <div className="prose prose-invert max-w-none prose-p:leading-7 prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0 prose-pre:border-0 prose-hr:border-0 prose-headings:border-0 prose-blockquote:border-0">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
@@ -98,7 +95,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
                       )
                     },
                     hr() {
-                      return <div className="my-6 border-b border-[#27272a]" />
+                      return <div className="my-8 h-px bg-[#27272a]" />
                     },
                     table({children}) {
                       return (

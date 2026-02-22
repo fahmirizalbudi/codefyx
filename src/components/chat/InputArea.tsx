@@ -85,8 +85,8 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
   return (
     <div className="w-full relative group flex flex-col gap-2">
       {attachment && (
-        <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#27272a] self-start px-3 py-2 rounded-xl animate-in fade-in slide-in-from-bottom-2">
-          <div className="w-8 h-8 bg-[#27272a] rounded-lg flex items-center justify-center">
+        <div className="flex items-center gap-2 bg-[#1a1a1a] self-start px-3 py-2 rounded-xl animate-in fade-in slide-in-from-bottom-2 shadow-sm">
+          <div className="w-8 h-8 bg-[#222] rounded-lg flex items-center justify-center">
             <FileText weight="fill" className="w-4 h-4 text-gray-400" />
           </div>
           <div className="flex flex-col">
@@ -105,10 +105,10 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
       <form 
         onSubmit={handleSubmit}
         className={cn(
-          "relative w-full bg-[#1a1a1a] rounded-[24px] p-2 flex items-end gap-2 transition-all duration-300 border border-[#27272a]",
+          "relative w-full bg-[#121212] rounded-[24px] p-2 flex items-end gap-2 transition-all duration-300",
           isFocused 
-            ? "shadow-lg bg-[#27272a] border-[#3f3f46] ring-1 ring-[#3f3f46]/50" 
-            : "hover:border-[#333]"
+            ? "shadow-2xl shadow-black/20 bg-[#161616]" 
+            : "hover:bg-[#161616]"
         )}
       >
         <input 
@@ -123,7 +123,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
            <button 
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2.5 rounded-full hover:bg-[#333] text-gray-400 hover:text-gray-200 transition-all tooltip"
+            className="p-2.5 rounded-full hover:bg-[#222] text-gray-400 hover:text-gray-200 transition-all tooltip"
             title="Attach code or text file"
           >
             <Paperclip weight="bold" className="w-5 h-5" />
@@ -151,7 +151,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
             className={cn(
               "p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm",
               (!input.trim() && !attachment) || isLoading 
-                ? "bg-[#27272a] text-gray-500 cursor-not-allowed"
+                ? "bg-[#222] text-gray-600 cursor-not-allowed"
                 : "bg-white text-black hover:bg-gray-200"
             )}
           >
