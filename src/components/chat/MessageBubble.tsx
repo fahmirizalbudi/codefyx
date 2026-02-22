@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Copy, ThumbsUp, ThumbsDown, ArrowCounterClockwise, User, Robot } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 
@@ -11,6 +12,8 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) => {
   const isUser = role === 'user';
+
+  if (!content || content.trim() === '') return null;
 
   return (
     <div className={cn(
@@ -40,26 +43,30 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
             {isUser ? "You" : "Codefyx AI"}
           </div>
           <div className={cn(
-            "text-[15px] leading-7 text-gray-200 break-words whitespace-pre-wrap font-normal antialiased",
+            "text-[15px] leading-7 text-gray-200 break-words font-normal antialiased prose prose-invert max-w-none prose-p:leading-7 prose-pre:bg-[#1a1a1a] prose-pre:border prose-pre:border-[#333] prose-pre:rounded-xl",
              isUser ? "bg-[#1a1a1a] border border-[#27272a] px-5 py-3 rounded-[20px] rounded-tr-md inline-block text-left shadow-sm" : "pl-1"
           )}>
-            {content}
+            {isUser ? (
+              content
+            ) : (
+              <ReactMarkdown>{content}</ReactMarkdown>
+            )}
           </div>
           
           {!isUser && (
             <div className="flex items-center gap-1 pt-2 opacity-0 group-hover:opacity-100 transition-opacity justify-start pl-1">
               <button className="p-1.5 hover:bg-[#1a1a1a] rounded-md text-gray-500 hover:text-gray-300 transition-colors" aria-label="Copy">
-                <Copy className="w-4 h-4" />
+                <Copy className="w-3.5 h-3.5" />
               </button>
               <button className="p-1.5 hover:bg-[#1a1a1a] rounded-md text-gray-500 hover:text-gray-300 transition-colors" aria-label="Regenerate">
-                <ArrowCounterClockwise className="w-4 h-4" />
+                <ArrowCounterClockwise className="w-3.5 h-3.5" />
               </button>
               <div className="w-px h-3 bg-[#333] mx-1.5" />
               <button className="p-1.5 hover:bg-[#1a1a1a] rounded-md text-gray-500 hover:text-gray-300 transition-colors" aria-label="Good response">
-                <ThumbsUp className="w-4 h-4" />
+                <ThumbsUp className="w-3.5 h-3.5" />
               </button>
               <button className="p-1.5 hover:bg-[#1a1a1a] rounded-md text-gray-500 hover:text-gray-300 transition-colors" aria-label="Bad response">
-                <ThumbsDown className="w-4 h-4" />
+                <ThumbsDown className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
