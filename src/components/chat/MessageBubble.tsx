@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Check, Copy, Robot, User } from "@phosphor-icons/react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { cn } from "../../lib/utils";
+
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Copy, User, Robot, Check } from '@phosphor-icons/react';
+import { cn } from '../../lib/utils';
 
 interface MessageBubbleProps {
   role: 'user' | 'assistant';
@@ -78,15 +79,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
                               {copied ? 'Copied' : 'Copy'}
                             </button>
                           </div>
-                          <SyntaxHighlighter
-                            {...props}
-                            style={vscDarkPlus}
-                            language={match[1]}
-                            PreTag="div"
-                            customStyle={{ margin: 0, borderRadius: 0, background: 'transparent', fontSize: '14px', padding: '1rem' }}
-                          >
-                            {codeText}
-                          </SyntaxHighlighter>
+                          <div className="custom-scrollbar overflow-x-auto">
+                            <SyntaxHighlighter
+                              {...props}
+                              style={vscDarkPlus}
+                              language={match[1]}
+                              PreTag="div"
+                              customStyle={{ margin: 0, borderRadius: 0, background: 'transparent', fontSize: '14px', padding: '1rem' }}
+                            >
+                              {codeText}
+                            </SyntaxHighlighter>
+                          </div>
                         </div>
                       ) : (
                         <code {...props} className={cn("bg-[#1a1a1a] text-[#e5e7eb] px-1.5 py-0.5 rounded font-mono text-[13px]", className)}>
@@ -99,7 +102,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ role, content }) =
                     },
                     table({children}) {
                       return (
-                        <div className="overflow-x-auto my-6 rounded-lg bg-[#111]">
+                        <div className="overflow-x-auto my-6 rounded-lg bg-[#111] custom-scrollbar">
                           <table className="min-w-full text-sm text-gray-300">
                             {children}
                           </table>

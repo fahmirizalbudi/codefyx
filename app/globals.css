@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --background: #09090b; /* Zinc 950 */
-  --foreground: #fafafa; /* Zinc 50 */
+  --background: #09090b;
+  --foreground: #fafafa;
   --sidebar: #000000;
-  --accent: #27272a; /* Zinc 800 */
+  --accent: #27272a;
 }
 
 body {
@@ -16,26 +16,34 @@ body {
   @apply antialiased tracking-tight;
 }
 
-/* Custom Scrollbar for Dark Mode */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
   background-color: #27272a;
-  border-radius: 20px;
-  border: 2px solid var(--sidebar); /* Creates padding effect */
+  border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
   background-color: #3f3f46;
 }
 
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 ::selection {
-  background: #3f3f46; /* Zinc 700 */
+  background: #3f3f46;
   color: #ffffff;
 }
