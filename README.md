@@ -74,6 +74,7 @@ npm install
 Create a `.env.local` file in the root directory and add your Supabase credentials:
 
 ```env
+GEMINI_KEY=your_gemini_api_key
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
