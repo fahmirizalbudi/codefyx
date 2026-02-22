@@ -1,10 +1,9 @@
 "use client";
-
-import React, { useState, useEffect } from 'react';
-import { MagnifyingGlass, Plus, SquaresFour, ChatCircle } from '@phosphor-icons/react';
-import { cn } from '../../lib/utils';
-import { Logo } from '../Logo';
-import { supabase } from '@/src/lib/supabaseClient';
+import React, { useEffect, useState } from "react";
+import { ChatCircle, MagnifyingGlass, Plus, SquaresFour } from "@phosphor-icons/react";
+import { cn } from "../../lib/utils";
+import { Logo } from "../Logo";
+import { supabase } from "@/src/lib/supabaseClient";
 
 interface SidebarProps {
   onNewChat: () => void;
@@ -104,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex-1 flex flex-col min-h-0 pt-2">
         <h3 className="px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4">History</h3>
         
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
+        <div className="flex-1 overflow-y-auto custom-scrollbar mr-2">
           {history.length > 0 && (
             <div className="flex flex-col gap-1">
               {history.map((item) => (
@@ -119,7 +118,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}
                 >
                   <ChatCircle weight="regular" className="w-5 h-5 shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors" />
-                  <span className="truncate">{item.content}</span>
+                  {item.content.length > 25
+                    ? item.content.slice(0, 25) + "..."
+                    : item.content}
                 </button>
               ))}
             </div>
