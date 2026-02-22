@@ -5,39 +5,62 @@ import { cn } from '../../lib/utils';
 import { InputArea } from './InputArea';
 import { MessageBubble } from './MessageBubble';
 import { supabase } from '@/src/lib/supabaseClient';
+import { CircleNotch } from '@phosphor-icons/react';
+
+interface ChatAreaProps {
+  sessionId: string;
+  onMessageSent?: () => void;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   created_at?: string;
+  session_id?: string;
 }
 
-export const ChatArea: React.FC = () => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
 
-  // Fetch messages on mount
+  // Fetch messages when sessionId changes
   useEffect(() => {
     const fetchMessages = async () => {
+      setMessages([]); // Clear view while loading new session
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('messages')
           .select('*')
           .order('created_at', { ascending: true });
 
+        if (sessionId) {
+           query = query.eq('session_id', sessionId);
+        }
+
+        const { data, error } = await query;
+
         if (error) {
-          console.error('Supabase Error:', error);
+          if (error.code === '42703') { // Fallback if column missing
+             const { data: fallbackData } = await supabase
+              .from('messages')
+              .select('*')
+              .order('created_at', { ascending: true });
+             
+             if (fallbackData) {
+                const validMessages = fallbackData.filter((msg: any) => msg.content && msg.content.trim() !== '');
+                setMessages(validMessages as any);
+             }
+          }
         } else if (data) {
-          // Filter out empty messages from DB
           const validMessages = data.filter((msg: any) => msg.content && msg.content.trim() !== '');
           setMessages(validMessages as any);
         }
@@ -48,16 +71,17 @@ export const ChatArea: React.FC = () => {
 
     fetchMessages();
 
-    // Realtime subscription
+    // Subscribe to realtime changes
     const channel = supabase
-      .channel('messages_channel')
+      .channel(`session_${sessionId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
         const newMsg = payload.new as Message;
         if (!newMsg.content || newMsg.content.trim() === '') return;
+        
+        if (sessionId !== 'default' && newMsg.session_id && newMsg.session_id !== sessionId) return;
 
         setMessages((prev) => {
-          // Prevent duplicates from optimistic updates
-          const exists = prev.some(m => m.id === newMsg.id || (m.role === newMsg.role && m.content === newMsg.content && m.id.length > 10)); // Simple duplicate check
+          const exists = prev.some(m => m.id === newMsg.id);
           if (exists) return prev;
           return [...prev, newMsg];
         });
@@ -67,27 +91,33 @@ export const ChatArea: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [sessionId]);
 
   const handleSend = async (content: string) => {
     if (!content || content.trim() === '') return;
 
-    // 1. Optimistic Update
     const tempId = Date.now().toString();
-    const userMsg: Message = { id: tempId, role: 'user', content };
+    const userMsg: Message = { id: tempId, role: 'user', content, session_id: sessionId };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
     try {
-      // 2. Save User Message
+      // Save User Message
       const { error: saveError } = await supabase
         .from('messages')
-        .insert([{ role: 'user', content }]);
+        .insert([{ role: 'user', content, session_id: sessionId }]);
 
-      if (saveError) throw new Error("Failed to save message: " + saveError.message);
+      if (saveError && saveError.code !== '42703') {
+         throw new Error("Failed to save message: " + saveError.message);
+      } else if (saveError && saveError.code === '42703') {
+         // Fallback insert
+         await supabase.from('messages').insert([{ role: 'user', content }]);
+      }
 
-      // 3. Call AI API
-      // Send context (excluding temporary error messages)
+      // Notify parent to refresh history sidebar immediately
+      if (onMessageSent) onMessageSent();
+
+      // Call AI API
       const contextMessages = messages.filter(m => m.id !== 'error');
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -102,19 +132,28 @@ export const ChatArea: React.FC = () => {
 
       if (!aiContent || aiContent.trim() === '') throw new Error('Empty response from AI');
 
-      // 4. Save AI Response
+      // Save AI Response
       const { error: aiSaveError } = await supabase
         .from('messages')
-        .insert([{ role: 'assistant', content: aiContent }]);
+        .insert([{ role: 'assistant', content: aiContent, session_id: sessionId }]);
 
-      if (aiSaveError) throw aiSaveError;
-
-      // Force refresh to get exact server state (optional but safer for IDs)
-      const { data: latestData } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
-      if (latestData) {
-         const validMessages = latestData.filter((msg: any) => msg.content && msg.content.trim() !== '');
-         setMessages(validMessages as any);
+      if (aiSaveError && aiSaveError.code === '42703') {
+         await supabase.from('messages').insert([{ role: 'assistant', content: aiContent }]);
+      } else if (aiSaveError) {
+         throw aiSaveError;
       }
+
+      const aiMsg: Message = { 
+        id: (Date.now() + 1).toString(), 
+        role: 'assistant', 
+        content: aiContent, 
+        session_id: sessionId 
+      };
+      
+      setMessages(prev => {
+        if (prev.some(m => m.content === aiMsg.content && m.role === 'assistant')) return prev;
+        return [...prev, aiMsg];
+      });
 
     } catch (error: any) {
       console.error("Chat Error:", error);
@@ -126,11 +165,8 @@ export const ChatArea: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0a0a0a] text-gray-200 relative overflow-hidden">
-
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth">
         <div className="max-w-4xl mx-auto w-full px-6 md:px-0 pt-10 pb-40 space-y-8">
-          
           {messages.map((msg) => (
             <MessageBubble 
               key={msg.id || msg.created_at || Math.random()} 
@@ -138,19 +174,16 @@ export const ChatArea: React.FC = () => {
               content={msg.content}
             />
           ))}
-          
           {isLoading && (
             <div className="px-4 py-4 flex items-center gap-2">
-              <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" />
-              <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-150" />
-              <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-300" />
+              <CircleNotch weight="bold" className="w-5 h-5 text-indigo-500 animate-spin" />
+              <span className="text-sm text-gray-500">Codefyx is thinking...</span>
             </div>
           )}
           <div ref={scrollRef} />
         </div>
       </div>
 
-      {/* Input */}
       <div className="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent pt-20">
         <div className="max-w-4xl mx-auto w-full">
            <InputArea onSend={handleSend} isLoading={isLoading} />

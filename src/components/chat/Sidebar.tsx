@@ -7,44 +7,64 @@ import { Logo } from '../Logo';
 import { supabase } from '@/src/lib/supabaseClient';
 
 interface SidebarProps {
-  onNewChat?: () => void;
+  onNewChat: () => void;
+  onSearchClick: () => void;
+  onExploreClick: () => void;
+  activeSessionId?: string;
+  onSessionSelect: (sessionId: string) => void;
+  triggerUpdate?: number; // New prop to force refresh
 }
 
 interface HistoryItem {
   id: string;
   content: string;
   created_at: string;
+  session_id: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
-  const [activeId, setActiveId] = useState<string | null>(null);
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  onNewChat, 
+  onSearchClick, 
+  onExploreClick, 
+  activeSessionId, 
+  onSessionSelect,
+  triggerUpdate
+}) => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const fetchHistory = async () => {
     try {
       const { data } = await supabase
         .from('messages')
-        .select('id, content, created_at')
+        .select('id, content, created_at, session_id')
         .eq('role', 'user')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(50);
 
       if (data) {
-        setHistory(data);
+        const uniqueSessions = Array.from(new Map(data.map(item => [item.session_id || 'default', item])).values());
+        setHistory(uniqueSessions);
       }
     } catch (err) {
       console.error("Failed to fetch history:", err);
     }
   };
 
+  // Fetch on mount and when triggerUpdate changes
   useEffect(() => {
     fetchHistory();
+  }, [triggerUpdate]);
 
+  // Keep Realtime as a backup
+  useEffect(() => {
     const channel = supabase
       .channel('sidebar_history')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'role=eq.user' }, (payload) => {
         const newItem = payload.new as HistoryItem;
-        setHistory(prev => [newItem, ...prev]);
+        setHistory(prev => {
+          const filtered = prev.filter(item => (item.session_id || 'default') !== (newItem.session_id || 'default'));
+          return [newItem, ...filtered];
+        });
       })
       .subscribe();
 
@@ -54,8 +74,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
   }, []);
 
   const menuItems = [
-    { icon: MagnifyingGlass, label: "Search" },
-    { icon: SquaresFour, label: "Explore" },
+    { icon: MagnifyingGlass, label: "Search", action: onSearchClick },
+    { icon: SquaresFour, label: "Explore", action: onExploreClick },
   ];
 
   return (
@@ -79,6 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
         {menuItems.map((item) => (
           <button 
             key={item.label}
+            onClick={item.action}
             className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
           >
             <item.icon weight="bold" className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
@@ -97,10 +118,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNewChat }) => {
               {history.map((item) => (
                 <button 
                   key={item.id} 
-                  onClick={() => setActiveId(item.id)}
+                  onClick={() => onSessionSelect(item.session_id || 'default')}
                   className={cn(
                     "w-full text-left px-3 py-3 rounded-xl text-[15px] transition-all duration-200 truncate group relative flex items-center gap-3.5",
-                    activeId === item.id 
+                    activeSessionId === (item.session_id || 'default') 
                       ? "bg-[#1a1a1a] text-gray-100" 
                       : "text-gray-400 hover:bg-[#1a1a1a]/50 hover:text-gray-200"
                   )}
