@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { MagnifyingGlass, Plus, SquaresFour, ChatCircle } from '@phosphor-icons/react';
+import { MagnifyingGlass, Plus, ChatCircle } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { Logo } from '../Logo';
 import { supabase } from '@/src/lib/supabaseClient';
@@ -9,10 +9,9 @@ import { supabase } from '@/src/lib/supabaseClient';
 interface SidebarProps {
   onNewChat: () => void;
   onSearchClick: () => void;
-  onExploreClick: () => void;
   activeSessionId?: string;
   onSessionSelect: (sessionId: string) => void;
-  triggerUpdate?: number; // New prop to force refresh
+  triggerUpdate?: number;
 }
 
 interface HistoryItem {
@@ -25,7 +24,6 @@ interface HistoryItem {
 export const Sidebar: React.FC<SidebarProps> = ({ 
   onNewChat, 
   onSearchClick, 
-  onExploreClick, 
   activeSessionId, 
   onSessionSelect,
   triggerUpdate
@@ -50,12 +48,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Fetch on mount and when triggerUpdate changes
   useEffect(() => {
     fetchHistory();
   }, [triggerUpdate]);
 
-  // Keep Realtime as a backup
   useEffect(() => {
     const channel = supabase
       .channel('sidebar_history')
@@ -75,7 +71,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems = [
     { icon: MagnifyingGlass, label: "Search", action: onSearchClick },
-    { icon: SquaresFour, label: "Explore", action: onExploreClick },
   ];
 
   return (
