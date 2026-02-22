@@ -100,8 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 pt-2">
-        <h3 className="px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4">History</h3>
+      <div className="flex-1 flex flex-col min-h-0 pt-6">
+        <h3 className="px-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider mb-4">History</h3>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar mr-2">
           {history.length > 0 && (
