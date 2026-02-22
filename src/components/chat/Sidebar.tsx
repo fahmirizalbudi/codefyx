@@ -145,7 +145,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                   >
                     <ChatCircle weight="regular" className="w-5 h-5 shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors" />
-                    <span className="truncate">{item.content}</span>
+                    <span className="truncate">
+                      {item.content.length > 25
+                        ? item.content.slice(0, 25) + "..."
+                        : item.content}
+                    </span>
                   </button>
                 </div>
               ))}
