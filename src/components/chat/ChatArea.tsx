@@ -23,25 +23,51 @@ export const ChatArea: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = (content: string) => {
+  const handleSend = async (content: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content
     };
     
-    setMessages(prev => [...prev, newMessage]);
+    // Optimistic update
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: updatedMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch response');
+      }
+
+      const data = await response.json();
+      
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm a large language model trained by Codefyx. I can answer your questions, write code, and more. What would you like to explore?"
+        content: data.content
       };
+
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Chat Error:", error);
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "Sorry, I encountered an error while processing your request. Please try again."
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsLoading(false);
-    }, 1200);
+    }
   };
 
   return (
