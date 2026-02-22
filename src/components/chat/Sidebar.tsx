@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { MagnifyingGlass, Plus, ChatCircle } from '@phosphor-icons/react';
+import { MagnifyingGlass, Plus, SquaresFour, ChatCircle } from '@phosphor-icons/react';
 import { cn } from '../../lib/utils';
 import { Logo } from '../Logo';
 import { supabase } from '@/src/lib/supabaseClient';
@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         setHistory(uniqueSessions);
       }
     } catch (err) {
-      console.error("Failed to fetch history:", err);
+      console.error(err);
     }
   };
 
@@ -75,13 +75,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="flex flex-col h-full w-[300px] bg-black text-white py-6 pl-4 pr-2 hidden md:flex flex-shrink-0">
-      {/* Header */}
       <div className="flex items-center gap-3.5 mb-8 px-2">
         <Logo />
         <span className="font-semibold text-[16px] tracking-wide text-white">Codefyx</span>
       </div>
 
-      {/* Main Action */}
       <div className="flex flex-col gap-1 mb-2">
         <button 
           onClick={onNewChat}
@@ -103,7 +101,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
-      {/* History List */}
       <div className="flex-1 flex flex-col min-h-0 pt-2">
         <h3 className="px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4">History</h3>
         

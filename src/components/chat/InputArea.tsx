@@ -24,9 +24,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
 
   useEffect(() => {
     if (textareaRef.current) {
-      // Reset height to auto to get the correct scrollHeight for shrinking
       textareaRef.current.style.height = 'auto';
-      // Set new height based on content
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [input]);
@@ -71,7 +69,6 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
       onSend(finalMessage);
       setInput('');
       setAttachment(null);
-      // Reset height immediately
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
@@ -87,7 +84,6 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
 
   return (
     <div className="w-full relative group flex flex-col gap-2">
-      {/* Attachment Preview */}
       {attachment && (
         <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#27272a] self-start px-3 py-2 rounded-xl animate-in fade-in slide-in-from-bottom-2">
           <div className="w-8 h-8 bg-[#27272a] rounded-lg flex items-center justify-center">
@@ -145,7 +141,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
           className="w-full max-h-[200px] bg-transparent border-none outline-none text-gray-100 placeholder-gray-500 text-[15px] leading-6 resize-none py-3.5 px-2 font-normal custom-scrollbar"
           rows={1}
           disabled={isLoading}
-          style={{ overflowY: 'hidden' }} // Default hidden, logic below handles expansion
+          style={{ overflowY: 'hidden' }}
         />
 
         <div className="pb-1.5 pr-2">

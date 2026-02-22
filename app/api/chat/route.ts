@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
@@ -14,9 +14,8 @@ export async function POST(req: Request) {
       parts: [{ text: msg.content }]
     }));
 
-    // Switch to gemini-2.0-flash-exp as requested (interpreted from "2.5 flash")
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +28,6 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API Error:", response.status, errorText);
       return NextResponse.json({ error: `Gemini API Error: ${errorText}` }, { status: response.status });
     }
 
@@ -39,7 +37,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ role: 'assistant', content: assistantMessage });
 
   } catch (error: any) {
-    console.error("Server Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

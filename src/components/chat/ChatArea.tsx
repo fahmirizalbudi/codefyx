@@ -25,17 +25,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
 
-  // Fetch messages when sessionId changes
   useEffect(() => {
     const fetchMessages = async () => {
-      setMessages([]); // Clear view while loading new session
+      setMessages([]); 
       try {
         let query = supabase
           .from('messages')
@@ -49,7 +47,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
         const { data, error } = await query;
 
         if (error) {
-          if (error.code === '42703') { // Fallback if column missing
+          if (error.code === '42703') { 
              const { data: fallbackData } = await supabase
               .from('messages')
               .select('*')
@@ -65,13 +63,12 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
           setMessages(validMessages as any);
         }
       } catch (err) {
-        console.error("Fetch Error:", err);
+        console.error(err);
       }
     };
 
     fetchMessages();
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel(`session_${sessionId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
@@ -102,7 +99,6 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
     setIsLoading(true);
 
     try {
-      // Save User Message
       const { error: saveError } = await supabase
         .from('messages')
         .insert([{ role: 'user', content, session_id: sessionId }]);
@@ -110,14 +106,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
       if (saveError && saveError.code !== '42703') {
          throw new Error("Failed to save message: " + saveError.message);
       } else if (saveError && saveError.code === '42703') {
-         // Fallback insert
          await supabase.from('messages').insert([{ role: 'user', content }]);
       }
 
-      // Notify parent to refresh history sidebar immediately
       if (onMessageSent) onMessageSent();
 
-      // Call AI API
       const contextMessages = messages.filter(m => m.id !== 'error');
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -132,7 +125,6 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
 
       if (!aiContent || aiContent.trim() === '') throw new Error('Empty response from AI');
 
-      // Save AI Response
       const { error: aiSaveError } = await supabase
         .from('messages')
         .insert([{ role: 'assistant', content: aiContent, session_id: sessionId }]);
@@ -156,7 +148,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
       });
 
     } catch (error: any) {
-      console.error("Chat Error:", error);
+      console.error(error);
       setMessages(prev => [...prev, { id: 'error', role: 'assistant', content: `Error: ${error.message}` }]);
     } finally {
       setIsLoading(false);

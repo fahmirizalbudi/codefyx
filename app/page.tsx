@@ -10,7 +10,6 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [historyTrigger, setHistoryTrigger] = useState(0);
 
-  // Initialize with a fresh session on mount
   useEffect(() => {
     setSessionId(crypto.randomUUID());
   }, []);
@@ -30,7 +29,6 @@ export default function Home() {
         triggerUpdate={historyTrigger}
       />
       <main className="flex-1 flex flex-col relative h-full">
-        {/* Only render ChatArea once we have a sessionId to avoid flickering default state */}
         {sessionId && (
           <ChatArea 
             key={sessionId} 
