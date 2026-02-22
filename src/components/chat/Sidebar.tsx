@@ -106,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <span className="font-semibold text-[16px] tracking-wide text-white">Codefyx</span>
       </div>
 
-      <div className="flex flex-col gap-1 mb-2">
+      <div className="flex flex-col gap-1 mb-2 mr-2">
         <button 
           onClick={onNewChat}
           className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#111] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
@@ -127,10 +127,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 pt-2">
-        <h3 className="px-3 text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-4">History</h3>
+      <div className="flex-1 flex flex-col min-h-0 pt-6">
+        <h3 className="px-3 text-[12px] font-semibold text-gray-600 uppercase tracking-wider mb-4">History</h3>
         
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 relative">
+        <div className="flex-1 overflow-y-auto custom-scrollbar mr-2 relative">
           {history.length > 0 && (
             <div className="flex flex-col gap-1">
               {history.map((item) => (
