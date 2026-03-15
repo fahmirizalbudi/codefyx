@@ -1,8 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Figtree } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const figtree = Figtree({ 
+  weight: ['300', '400', '500', '600', '700', '800'],
+  subsets: ["latin"],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Codefyx - AI Coding Assistant",
@@ -44,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={figtree.className}>
         {children}
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Paperclip, ArrowUp, X, FileText } from '@phosphor-icons/react';
+import { Attachment01Icon, ArrowUp01Icon, Cancel01Icon, SourceCodeIcon } from 'hugeicons-react';
 import { cn } from '../../lib/utils';
 
 interface InputAreaProps {
@@ -65,8 +65,8 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
       finalMessage = `${input.trim()}\n\n---\n**Attached File:** \`${attachment.name}\`\n\`\`\`\n${attachment.content}\n\`\`\`\n---`;
     }
 
-    if (finalMessage.trim()) {
-      onSend(finalMessage);
+    if (finalMessage.trim() || attachment) {
+      onSend(finalMessage || "Please analyze the attached file.");
       setInput('');
       setAttachment(null);
       if (textareaRef.current) {
@@ -85,19 +85,19 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
   return (
     <div className="w-full relative group flex flex-col gap-2">
       {attachment && (
-        <div className="flex items-center gap-2 bg-[#1a1a1a] self-start px-3 py-2 rounded-xl animate-in fade-in slide-in-from-bottom-2 shadow-sm">
-          <div className="w-8 h-8 bg-[#222] rounded-lg flex items-center justify-center">
-            <FileText weight="fill" className="w-4 h-4 text-gray-400" />
+        <div className="flex items-center gap-3 bg-[#1e1e1e] self-start px-3 py-2 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-2 duration-300 ring-0 border-none">
+          <div className="w-8 h-8 bg-[#0a0a0a] rounded-lg flex items-center justify-center ring-0 border-none shadow-sm">
+            <SourceCodeIcon className="w-4 h-4 text-gray-400" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-gray-200 font-medium max-w-[200px] truncate">{attachment.name}</span>
-            <span className="text-[10px] text-gray-500">Text file</span>
+            <span className="text-[10px] text-gray-400 mt-0.5">Code / Text</span>
           </div>
           <button 
             onClick={removeAttachment}
-            className="ml-2 p-1 hover:bg-[#333] rounded-full text-gray-500 hover:text-white transition-colors"
+            className="ml-2 p-1.5 hover:bg-[#2a2a2a] rounded-full text-gray-500 hover:text-red-400 transition-colors duration-200 cursor-pointer"
           >
-            <X className="w-3.5 h-3.5" />
+            <Cancel01Icon className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -105,10 +105,10 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
       <form 
         onSubmit={handleSubmit}
         className={cn(
-          "relative w-full bg-[#121212] rounded-[24px] p-2 flex items-end gap-2 transition-all duration-300",
+          "relative w-full bg-[#141414] rounded-[24px] p-2 flex items-end gap-2 transition-all duration-300 ring-0",
           isFocused 
-            ? "shadow-2xl shadow-black/20 bg-[#161616]" 
-            : "hover:bg-[#161616]"
+            ? "shadow-[0_8px_30px_rgb(0,0,0,0.5)] bg-[#1a1a1a]" 
+            : "shadow-[0_4px_20px_rgb(0,0,0,0.3)] hover:bg-[#1a1a1a]"
         )}
       >
         <input 
@@ -123,10 +123,10 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
            <button 
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2.5 rounded-full hover:bg-[#222] text-gray-400 hover:text-gray-200 transition-all tooltip"
+            className="p-2.5 rounded-full hover:bg-[#2a2a2a] text-gray-400 hover:text-gray-200 transition-all duration-200 cursor-pointer"
             title="Attach code or text file"
           >
-            <Paperclip weight="bold" className="w-5 h-5" />
+            <Attachment01Icon className="w-5 h-5" />
           </button>
         </div>
         
@@ -149,13 +149,13 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading }) => {
             type="submit"
             disabled={(!input.trim() && !attachment) || isLoading}
             className={cn(
-              "p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm",
+              "p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center shadow-sm cursor-pointer",
               (!input.trim() && !attachment) || isLoading 
-                ? "bg-[#222] text-gray-600 cursor-not-allowed"
-                : "bg-white text-black hover:bg-gray-200"
+                ? "bg-[#222] text-gray-600 cursor-not-allowed shadow-none"
+                : "bg-[#06B6D4] text-white hover:bg-[#0891b2] hover:shadow-md hover:-translate-y-px"
             )}
           >
-            <ArrowUp weight="bold" className="w-5 h-5" />
+            <ArrowUp01Icon className="w-5 h-5" />
           </button>
         </div>
       </form>

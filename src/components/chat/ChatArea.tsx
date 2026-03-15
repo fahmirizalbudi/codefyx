@@ -5,11 +5,12 @@ import { cn } from '../../lib/utils';
 import { InputArea } from './InputArea';
 import { MessageBubble } from './MessageBubble';
 import { supabase } from '@/src/lib/supabaseClient';
-import { CircleNotch } from '@phosphor-icons/react';
+import { Loading02Icon, Menu01Icon } from 'hugeicons-react';
 
 interface ChatAreaProps {
   sessionId: string;
   onMessageSent?: () => void;
+  onToggleSidebar?: () => void;
 }
 
 interface Message {
@@ -20,7 +21,7 @@ interface Message {
   session_id?: string;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent, onToggleSidebar }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -156,9 +157,19 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0a0a0a] text-gray-200 relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-[#000000] text-gray-200 relative overflow-hidden">
+      {/* Mobile/Toggle Header */}
+      <div className="absolute top-0 left-0 right-0 p-4 z-30 flex items-center bg-gradient-to-b from-[#000000] to-transparent h-20 pointer-events-none">
+        <button 
+          onClick={onToggleSidebar}
+          className="p-2.5 rounded-xl hover:bg-[#1a1a1a] text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer pointer-events-auto shadow-sm ring-1 ring-white/5 backdrop-blur-md"
+        >
+          <Menu01Icon className="w-5 h-5" />
+        </button>
+      </div>
+
       <div className="flex-1 overflow-y-auto w-full custom-scrollbar scroll-smooth">
-        <div className="max-w-4xl mx-auto w-full px-6 md:px-0 pt-10 pb-40 space-y-8">
+        <div className="max-w-5xl mx-auto w-full px-4 md:px-0 pt-20 pb-40 space-y-8">
           {messages.map((msg) => (
             <MessageBubble 
               key={msg.id || msg.created_at || Math.random()} 
@@ -167,17 +178,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ sessionId, onMessageSent }) 
             />
           ))}
           {isLoading && (
-            <div className="px-4 py-4 flex items-center gap-2">
-              <CircleNotch weight="bold" className="w-5 h-5 text-indigo-500 animate-spin" />
-              <span className="text-sm text-gray-500">Codefyx is thinking...</span>
+            <div className="px-4 py-4 flex items-center gap-3">
+              <Loading02Icon className="w-5 h-5 text-[#06B6D4] animate-spin" />
+              <span className="text-sm font-medium text-gray-400 tracking-wide">Codefyx is thinking...</span>
             </div>
           )}
           <div ref={scrollRef} />
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent pt-20">
-        <div className="max-w-4xl mx-auto w-full">
+      <div className="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-[#000000] via-[#000000]/95 to-transparent pt-20">
+        <div className="max-w-5xl mx-auto w-full">
            <InputArea onSend={handleSend} isLoading={isLoading} />
            <p className="text-center text-[10px] text-gray-600 mt-4 font-mono tracking-wide">
              Codefyx AI can make mistakes. Consider checking important information.

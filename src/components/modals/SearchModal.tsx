@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ArrowRight, ChatCircle, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { ArrowRight01Icon, Comment01Icon, Search01Icon, Cancel01Icon } from "hugeicons-react";
 import { supabase } from "@/src/lib/supabaseClient";
-import { cn } from "@/src/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -49,9 +49,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-32 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-[#0a0a0a] rounded-[28px] shadow-none ring-1 ring-white/5 overflow-hidden flex flex-col animate-in zoom-in-95 slide-in-from-top-4 duration-300">
-        <div className="flex items-center gap-3 px-6 py-5">
-          <MagnifyingGlass weight="bold" className="w-5 h-5 text-gray-500" />
+      <div className="w-full max-w-xl bg-[#0a0a0a] rounded-[24px] shadow-[0_30px_60px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col animate-in zoom-in-95 slide-in-from-top-4 duration-300 ring-0 border-none">
+        <div className="flex items-center gap-3 px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.1)] z-10">
+          <Search01Icon className="w-5 h-5 text-gray-500" />
           <input 
             type="text" 
             autoFocus
@@ -62,13 +62,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
           />
           <button 
             onClick={onClose} 
-            className="p-1.5 hover:bg-[#1a1a1a] rounded-full text-gray-500 hover:text-white transition-colors"
+            className="p-1.5 hover:bg-[#1e1e1e] rounded-full text-gray-500 hover:text-white transition-colors duration-200 cursor-pointer"
           >
-            <X weight="bold" className="w-4 h-4" />
+            <Cancel01Icon className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="max-h-[450px] overflow-y-auto custom-scrollbar px-3 pb-4">
+        <div className="max-h-[450px] overflow-y-auto custom-scrollbar px-3 pb-4 pt-2">
           {loading ? (
             <div className="p-12 text-center text-gray-500 text-[14px]">
               <div className="flex justify-center mb-2">
@@ -85,13 +85,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
                     onSelectMessage(msg.session_id || 'default');
                     onClose();
                   }}
-                  className="w-full text-left px-4 py-4 rounded-[20px] hover:bg-[#111] group transition-all"
+                  className="w-full text-left px-4 py-4 rounded-[16px] hover:bg-[#1a1a1a] group transition-all duration-200 cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <span className={cn(
                         "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
-                        msg.role === 'user' ? "bg-blue-500/10 text-blue-400" : "bg-green-500/10 text-green-400"
+                        msg.role === 'user' ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
                       )}>
                         {msg.role}
                       </span>
@@ -99,9 +99,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
                         {new Date(msg.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <ArrowRight weight="bold" className="w-4 h-4 text-gray-700 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                    <ArrowRight01Icon className="w-4 h-4 text-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-2 group-hover:translate-x-0 group-hover:text-gray-300" />
                   </div>
-                  <p className="text-[14px] text-gray-400 line-clamp-2 leading-relaxed group-hover:text-gray-200 transition-colors">
+                  <p className="text-[14px] text-gray-400 line-clamp-2 leading-relaxed group-hover:text-gray-200 transition-colors duration-200">
                     {msg.content}
                   </p>
                 </button>
@@ -114,8 +114,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
             </div>
           ) : (
             <div className="p-16 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#111] mb-5 text-gray-600 ring-1 ring-white/5">
-                <ChatCircle weight="duotone" className="w-7 h-7" />
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#141414] mb-5 text-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border-none ring-0">
+                <Comment01Icon className="w-6 h-6" />
               </div>
               <p className="text-gray-500 text-[14px] max-w-[240px] mx-auto leading-relaxed">
                 Search for code, ideas, or past conversations across your chats.

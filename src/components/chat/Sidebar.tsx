@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { ChatCircle, MagnifyingGlass, Plus, Trash } from "@phosphor-icons/react";
+import { Comment01Icon, Search01Icon, PlusSignIcon, Delete01Icon } from "hugeicons-react";
 import { cn } from "../../lib/utils";
 import { Logo } from "../Logo";
 import { supabase } from "@/src/lib/supabaseClient";
@@ -11,6 +11,8 @@ interface SidebarProps {
   activeSessionId?: string;
   onSessionSelect: (sessionId: string) => void;
   triggerUpdate?: number;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 interface HistoryItem {
@@ -25,7 +27,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSearchClick, 
   activeSessionId, 
   onSessionSelect,
-  triggerUpdate
+  triggerUpdate,
+  isOpen,
+  onToggle
 }) => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, sessionId: string } | null>(null);
@@ -96,12 +100,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const menuItems = [
-    { icon: MagnifyingGlass, label: "Search", action: onSearchClick },
+    { icon: Search01Icon, label: "Search", action: onSearchClick },
   ];
 
   return (
-    <div className="flex flex-col h-full w-[300px] bg-black text-white py-6 pl-4 pr-2 hidden md:flex flex-shrink-0">
-      <div className="flex items-center gap-3.5 mb-8 px-2">
+    <>
+      <div 
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 md:relative flex flex-col h-full w-[320px] bg-[#0f0f0f] text-white py-6 pl-4 pr-2 flex-shrink-0 transition-transform duration-300 ease-in-out font-sans",
+          isOpen ? "translate-x-0" : "-translate-x-full md:absolute flex" 
+        )}
+      >
+      <div className="flex items-center gap-3.5 mb-8 px-2 cursor-pointer transition-opacity hover:opacity-80">
         <Logo />
         <span className="font-semibold text-[16px] tracking-wide text-white">Codefyx</span>
       </div>
@@ -109,9 +119,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex flex-col gap-1 mb-2 mr-2">
         <button 
           onClick={onNewChat}
-          className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#111] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
+          className="w-full text-left px-3 py-3 rounded-xl text-[15px] font-medium text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-100 transition-colors duration-200 flex items-center gap-3.5 group cursor-pointer"
         >
-          <Plus weight="bold" className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+          <PlusSignIcon className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors duration-200" />
           <span>New chat</span>
         </button>
         
@@ -119,16 +129,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button 
             key={item.label}
             onClick={item.action}
-            className="w-full text-left px-3 py-3 rounded-xl text-[15px] text-gray-400 hover:bg-[#111] hover:text-gray-100 transition-colors flex items-center gap-3.5 group"
+            className="w-full text-left px-3 py-3 rounded-xl text-[15px] font-medium text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-100 transition-colors duration-200 flex items-center gap-3.5 group cursor-pointer"
           >
-            <item.icon weight="bold" className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+            <item.icon className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors duration-200" />
             <span>{item.label}</span>
           </button>
         ))}
       </div>
 
       <div className="flex-1 flex flex-col min-h-0 pt-6">
-        <h3 className="px-3 text-[12px] font-semibold text-gray-600 uppercase tracking-wider mb-4">History</h3>
+        <h3 className="px-3 text-[12px] font-semibold text-gray-500 uppercase tracking-widest mb-4">History</h3>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar mr-2 relative">
           {history.length > 0 && (
@@ -138,13 +148,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button 
                     onClick={() => onSessionSelect(item.session_id || 'default')}
                     className={cn(
-                      "w-full text-left px-3 py-3 rounded-xl text-[15px] transition-all duration-200 truncate group relative flex items-center gap-3.5",
+                      "w-full text-left px-3 py-3 rounded-xl text-[14px] font-medium transition-all duration-200 truncate group relative flex items-center gap-3.5 cursor-pointer",
                       activeSessionId === (item.session_id || 'default') 
-                        ? "bg-[#111] text-gray-100" 
-                        : "text-gray-400 hover:bg-[#111]/60 hover:text-gray-200"
+                        ? "bg-[#1e1e1e] text-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.1)]" 
+                        : "text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-200"
                     )}
                   >
-                    <ChatCircle weight="regular" className="w-5 h-5 shrink-0 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                    <Comment01Icon className={cn(
+                        "w-4 h-4 shrink-0 transition-colors duration-200",
+                        activeSessionId === (item.session_id || 'default') ? "text-gray-300" : "text-gray-500 group-hover:text-gray-400"
+                    )} />
                     <span className="truncate">
                       {item.content.length > 25
                         ? item.content.slice(0, 25) + "..."
@@ -162,17 +175,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div 
           ref={contextMenuRef}
           style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-40 bg-[#111] rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-white/5"
+          className="fixed z-50 w-40 bg-[#1e1e1e] rounded-xl shadow-[0_10px_15px_rgba(0,0,0,0.3)] overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/10"
         >
           <button 
             onClick={() => handleDeleteSession(contextMenu.sessionId)}
-            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[#1a1a1a] flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 text-sm font-medium text-red-500 hover:bg-[#2a1a1a] hover:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
           >
-            <Trash className="w-4 h-4" />
+            <Delete01Icon className="w-4 h-4" />
             Delete Chat
           </button>
         </div>
       )}
     </div>
+    
+    {/* Mobile Overlay */}
+    {isOpen && (
+      <div 
+        className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm transition-opacity duration-300"
+        onClick={onToggle}
+      />
+    )}
+    </>
   );
 };
